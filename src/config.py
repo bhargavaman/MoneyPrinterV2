@@ -69,15 +69,25 @@ def get_headless() -> bool:
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
         return json.load(file)["headless"]
 
-def get_model() -> str:
+def get_ollama_base_url() -> str:
     """
-    Gets the model from the config file.
+    Gets the Ollama base URL.
 
     Returns:
-        model (str): The model
+        url (str): The Ollama base URL
     """
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
-        return json.load(file)["llm"]
+        return json.load(file).get("ollama_base_url", "http://127.0.0.1:11434")
+
+def get_ollama_model() -> str:
+    """
+    Gets the Ollama model name from the config file.
+
+    Returns:
+        model (str): The Ollama model name, or empty string if not set.
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("ollama_model", "")
 
 def get_twitter_language() -> str:
     """
@@ -89,15 +99,49 @@ def get_twitter_language() -> str:
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
         return json.load(file)["twitter_language"]
 
-def get_image_model() -> str:
+def get_nanobanana2_api_base_url() -> str:
     """
-    Gets the Image MOdel from the config file.
+    Gets the Nano Banana 2 (Gemini image) API base URL.
 
     Returns:
-        model (str): The image model
+        url (str): API base URL
     """
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
-        return json.load(file)["image_model"]
+        return json.load(file).get(
+            "nanobanana2_api_base_url",
+            "https://generativelanguage.googleapis.com/v1beta",
+        )
+
+def get_nanobanana2_api_key() -> str:
+    """
+    Gets the Nano Banana 2 API key.
+
+    Returns:
+        key (str): API key
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        configured = json.load(file).get("nanobanana2_api_key", "")
+        return configured or os.environ.get("GEMINI_API_KEY", "")
+
+def get_nanobanana2_model() -> str:
+    """
+    Gets the Nano Banana 2 model name.
+
+    Returns:
+        model (str): Model name
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("nanobanana2_model", "gemini-3.1-flash-image-preview")
+
+def get_nanobanana2_aspect_ratio() -> str:
+    """
+    Gets the aspect ratio for Nano Banana 2 image generation.
+
+    Returns:
+        ratio (str): Aspect ratio
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("nanobanana2_aspect_ratio", "9:16")
 
 def get_threads() -> int:
     """
@@ -109,16 +153,6 @@ def get_threads() -> int:
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
         return json.load(file)["threads"]
     
-def get_image_prompt_llm() -> str:
-    """
-    Gets the image prompt for LLM from the config file.
-
-    Returns:
-        prompt (str): The image prompt
-    """
-    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
-        return json.load(file)["image_prompt_llm"]
-
 def get_zip_url() -> str:
     """
     Gets the URL to the zip file containing the songs.
@@ -189,6 +223,16 @@ def get_outreach_message_body_file() -> str:
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
         return json.load(file)["outreach_message_body_file"]
 
+def get_tts_voice() -> str:
+    """
+    Gets the TTS voice from the config file.
+
+    Returns:
+        voice (str): The TTS voice
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("tts_voice", "Jasper")
+
 def get_assemblyai_api_key() -> str:
     """
     Gets the AssemblyAI API key.
@@ -198,6 +242,46 @@ def get_assemblyai_api_key() -> str:
     """
     with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
         return json.load(file)["assembly_ai_api_key"]
+
+def get_stt_provider() -> str:
+    """
+    Gets the configured STT provider.
+
+    Returns:
+        provider (str): The STT provider
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("stt_provider", "local_whisper")
+
+def get_whisper_model() -> str:
+    """
+    Gets the local Whisper model name.
+
+    Returns:
+        model (str): Whisper model name
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("whisper_model", "base")
+
+def get_whisper_device() -> str:
+    """
+    Gets the target device for Whisper inference.
+
+    Returns:
+        device (str): Whisper device
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("whisper_device", "auto")
+
+def get_whisper_compute_type() -> str:
+    """
+    Gets the compute type for Whisper inference.
+
+    Returns:
+        compute_type (str): Whisper compute type
+    """
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        return json.load(file).get("whisper_compute_type", "int8")
     
 def equalize_subtitles(srt_path: str, max_chars: int = 10) -> None:
     """
@@ -255,3 +339,67 @@ def get_script_sentence_length() -> int:
             return config_json["script_sentence_length"]
         else:
             return 4
+
+def get_post_bridge_config() -> dict:
+    """
+    Gets the Post Bridge configuration with safe defaults.
+
+    Returns:
+        config (dict): Sanitized Post Bridge configuration
+    """
+    defaults = {
+        "enabled": False,
+        "api_key": "",
+        "platforms": ["tiktok", "instagram"],
+        "account_ids": [],
+        "auto_crosspost": False,
+    }
+    supported_platforms = {"tiktok", "instagram"}
+
+    with open(os.path.join(ROOT_DIR, "config.json"), "r") as file:
+        config_json = json.load(file)
+
+    raw_config = config_json.get("post_bridge", {})
+    if not isinstance(raw_config, dict):
+        raw_config = {}
+
+    raw_platforms = raw_config.get("platforms")
+    normalized_platforms = []
+    seen_platforms = set()
+
+    if raw_platforms is None:
+        normalized_platforms = defaults["platforms"].copy()
+    elif isinstance(raw_platforms, list):
+        for platform in raw_platforms:
+            normalized_platform = str(platform).strip().lower()
+            if (
+                normalized_platform in supported_platforms
+                and normalized_platform not in seen_platforms
+            ):
+                normalized_platforms.append(normalized_platform)
+                seen_platforms.add(normalized_platform)
+    else:
+        normalized_platforms = []
+
+    raw_account_ids = raw_config.get("account_ids", defaults["account_ids"])
+    normalized_account_ids = []
+    if isinstance(raw_account_ids, list):
+        for account_id in raw_account_ids:
+            try:
+                normalized_account_ids.append(int(account_id))
+            except (TypeError, ValueError):
+                continue
+
+    api_key = str(raw_config.get("api_key", "")).strip()
+    if not api_key:
+        api_key = os.environ.get("POST_BRIDGE_API_KEY", "").strip()
+
+    return {
+        "enabled": bool(raw_config.get("enabled", defaults["enabled"])),
+        "api_key": api_key,
+        "platforms": normalized_platforms,
+        "account_ids": normalized_account_ids,
+        "auto_crosspost": bool(
+            raw_config.get("auto_crosspost", defaults["auto_crosspost"])
+        ),
+    }

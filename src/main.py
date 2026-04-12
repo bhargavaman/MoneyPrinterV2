@@ -15,6 +15,8 @@ from classes.YouTube import YouTube
 from prettytable import PrettyTable
 from classes.Outreach import Outreach
 from classes.AFM import AffiliateMarketing
+from llm_provider import list_models, select_model, get_active_model
+from post_bridge_integration import maybe_crosspost_youtube_short
 
 def main():
     """Main entry point for the application, providing a menu-driven interface
@@ -80,30 +82,15 @@ def main():
                 fp_profile = question(" => Enter the path to the Firefox profile: ")
                 niche = question(" => Enter the account niche: ")
                 language = question(" => Enter the account language: ")
-                
-                # Add image generation options
-                info("\n============ IMAGE GENERATION ============", False)
-                print(colored(" 1. G4F (SDXL Turbo)", "cyan"))
-                print(colored(" 2. Cloudflare Worker", "cyan"))
-                info("=======================================", False)
-                print(colored("\nRecommendation: If you're unsure, select G4F (Option 1) as there's no additional setup", "yellow"))
-                info("=======================================\n", False)
-                
-                image_gen_choice = question(" => Select image generation method (1/2): ")
-                
+
                 account_data = {
                     "id": generated_uuid,
                     "nickname": nickname,
                     "firefox_profile": fp_profile,
                     "niche": niche,
                     "language": language,
-                    "use_g4f": image_gen_choice == "1",
-                    "videos": []
+                    "videos": [],
                 }
-                
-                if image_gen_choice == "2":
-                    worker_url = question(" => Enter your Cloudflare worker URL for image generation: ")
-                    account_data["worker_url"] = worker_url
 
                 add_account("youtube", account_data)
 
@@ -116,8 +103,31 @@ def main():
                 table.add_row([cached_accounts.index(account) + 1, colored(account["id"], "cyan"), colored(account["nickname"], "blue"), colored(account["niche"], "green")])
 
             print(table)
+            info("Type 'd' to delete an account.", False)
 
-            user_input = question("Select an account to start: ")
+            user_input = question("Select an account to start (or 'd' to delete): ").strip()
+
+            if user_input.lower() == "d":
+                delete_input = question("Enter account number to delete: ").strip()
+                account_to_delete = None
+
+                for account in cached_accounts:
+                    if str(cached_accounts.index(account) + 1) == delete_input:
+                        account_to_delete = account
+                        break
+
+                if account_to_delete is None:
+                    error("Invalid account selected. Please try again.", "red")
+                else:
+                    confirm = question(f"Are you sure you want to delete '{account_to_delete['nickname']}'? (Yes/No): ").strip().lower()
+
+                    if confirm == "yes":
+                        remove_account("youtube", account_to_delete["id"])
+                        success("Account removed successfully!")
+                    else:
+                        warning("Account deletion canceled.", False)
+
+                return
 
             selected_account = None
 
@@ -154,7 +164,15 @@ def main():
                         youtube.generate_video(tts)
                         upload_to_yt = question("Do you want to upload this video to YouTube? (Yes/No): ")
                         if upload_to_yt.lower() == "yes":
-                            youtube.upload_video()
+                            upload_success = youtube.upload_video()
+                            if upload_success:
+                                maybe_crosspost_youtube_short(
+                                    video_path=youtube.video_path,
+                                    title=youtube.metadata.get("title", ""),
+                                    interactive=True,
+                                )
+                            else:
+                                warning("YouTube upload failed. Skipping Post Bridge cross-post.")
                     elif user_input == 2:
                         videos = youtube.get_videos()
 
@@ -184,19 +202,9 @@ def main():
                         user_input = int(question("Select an Option: "))
 
                         cron_script_path = os.path.join(ROOT_DIR, "src", "cron.py")
-                        command = f"python {cron_script_path} youtube {selected_account['id']}"
+                        command = ["python", cron_script_path, "youtube", selected_account['id'], get_active_model()]
 
                         def job():
-                            """Executes a shell command using subprocess.run.
-
-    This function runs a specified shell command using the subprocess module.
-    The command to be executed should be defined in the 'command' variable.
-
-    Args:
-        None
-
-    Returns:
-        None"""
                             subprocess.run(command)
 
                         if user_input == 1:
@@ -246,8 +254,31 @@ def main():
                 table.add_row([cached_accounts.index(account) + 1, colored(account["id"], "cyan"), colored(account["nickname"], "blue"), colored(account["topic"], "green")])
 
             print(table)
+            info("Type 'd' to delete an account.", False)
 
-            user_input = question("Select an account to start: ")
+            user_input = question("Select an account to start (or 'd' to delete): ").strip()
+
+            if user_input.lower() == "d":
+                delete_input = question("Enter account number to delete: ").strip()
+                account_to_delete = None
+
+                for account in cached_accounts:
+                    if str(cached_accounts.index(account) + 1) == delete_input:
+                        account_to_delete = account
+                        break
+
+                if account_to_delete is None:
+                    error("Invalid account selected. Please try again.", "red")
+                else:
+                    confirm = question(f"Are you sure you want to delete '{account_to_delete['nickname']}'? (Yes/No): ").strip().lower()
+
+                    if confirm == "yes":
+                        remove_account("twitter", account_to_delete["id"])
+                        success("Account removed successfully!")
+                    else:
+                        warning("Account deletion canceled.", False)
+
+                return
 
             selected_account = None
 
@@ -302,19 +333,9 @@ def main():
                         user_input = int(question("Select an Option: "))
 
                         cron_script_path = os.path.join(ROOT_DIR, "src", "cron.py")
-                        command = f"python {cron_script_path} twitter {selected_account['id']}"
+                        command = ["python", cron_script_path, "twitter", selected_account['id'], get_active_model()]
 
                         def job():
-                            """Executes a shell command using subprocess.run.
-
-    This function runs a specified shell command using the subprocess module.
-    The command to be executed should be defined in the 'command' variable.
-
-    Args:
-        None
-
-    Returns:
-        None"""
                             subprocess.run(command)
 
                         if user_input == 1:
@@ -431,6 +452,42 @@ if __name__ == "__main__":
 
     # Fetch MP3 Files
     fetch_songs()
+
+    # Select Ollama model — use config value if set, otherwise pick interactively
+    configured_model = get_ollama_model()
+    if configured_model:
+        select_model(configured_model)
+        success(f"Using configured model: {configured_model}")
+    else:
+        try:
+            models = list_models()
+        except Exception as e:
+            error(f"Could not connect to Ollama: {e}")
+            sys.exit(1)
+
+        if not models:
+            error("No models found on Ollama. Pull a model first (e.g. 'ollama pull llama3.2:3b').")
+            sys.exit(1)
+
+        info("\n========== OLLAMA MODELS =========", False)
+        for idx, model_name in enumerate(models):
+            print(colored(f" {idx + 1}. {model_name}", "cyan"))
+        info("==================================\n", False)
+
+        model_choice = None
+        while model_choice is None:
+            raw = input(colored("Select a model: ", "magenta")).strip()
+            try:
+                choice_idx = int(raw) - 1
+                if 0 <= choice_idx < len(models):
+                    model_choice = models[choice_idx]
+                else:
+                    warning("Invalid selection. Try again.")
+            except ValueError:
+                warning("Please enter a number.")
+
+        select_model(model_choice)
+        success(f"Using model: {model_choice}")
 
     while True:
         main()

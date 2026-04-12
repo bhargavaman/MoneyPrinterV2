@@ -1,10 +1,11 @@
 # MoneyPrinter V2
 
-> ♥︎ **Sponsor**: The Best AI Chat App: [shiori.ai](https://www.shiori.ai)
+Sponsored by Post Bridge
 
----
+<a href="https://www.post-bridge.com/?ref=moneyprinter">
+  <img src="docs/repo/PostBridgeBanner.png" alt="Post Bridge integration banner" width="720" />
+</a>
 
-> 𝕏 Also, follow me on X: [@DevBySami](https://x.com/DevBySami).
 
 [![madewithlove](https://img.shields.io/badge/made_with-%E2%9D%A4-red?style=for-the-badge&labelColor=orange)](https://github.com/FujiwaraChoki/MoneyPrinterV2)
 
@@ -19,13 +20,13 @@
 An Application that automates the process of making money online.
 MPV2 (MoneyPrinter Version 2) is, as the name suggests, the second version of the MoneyPrinter project. It is a complete rewrite of the original project, with a focus on a wider range of features and a more modular architecture.
 
-> **Note:** MPV2 needs Python 3.9 to function effectively.
+> **Note:** MPV2 needs Python 3.12 to function effectively.
 > Watch the YouTube video [here](https://youtu.be/wAZ_ZSuIqfk)
 
 ## Features
 
 - [x] Twitter Bot (with CRON Jobs => `scheduler`)
-- [x] YouTube Shorts Automater (with CRON Jobs => `scheduler`)
+- [x] YouTube Shorts Automator (with CRON Jobs => `scheduler`)
 - [x] Affiliate Marketing (Amazon + Twitter)
 - [x] Find local businesses & cold outreach
 
@@ -38,8 +39,6 @@ MoneyPrinter has different versions for multiple languages developed by the comm
 If you would like to submit your own version/fork of MoneyPrinter, please open an issue describing the changes you made to the fork.
 
 ## Installation
-
-Please install [Microsoft Visual C++ build tools](https://visualstudio.microsoft.com/de/visual-cpp-build-tools/) first, so that CoquiTTS can function correctly.
 
 > ⚠️ If you are planning to reach out to scraped businesses per E-Mail, please first install the [Go Programming Language](https://golang.org/).
 
@@ -72,11 +71,11 @@ python src/main.py
 
 ## Documentation
 
-All relevant document can be found [here](docs/).
+All relevant documents can be found [here](docs/).
 
 ## Scripts
 
-For easier usage, there are some scripts in the `scripts` directory, that can be used to directly access the core functionality of MPV2, without the need of user interaction.
+For easier usage, there are some scripts in the `scripts` directory that can be used to directly access the core functionality of MPV2 without the need for user interaction.
 
 All scripts need to be run from the root directory of the project, e.g. `bash scripts/upload_video.sh`.
 
@@ -94,9 +93,9 @@ MoneyPrinterV2 is licensed under `Affero General Public License v3.0`. See [LICE
 
 ## Acknowledgments
 
-- [CoquiTTS](https://github.com/coqui-ai/TTS)
+- [KittenTTS](https://github.com/KittenML/KittenTTS)
 - [gpt4free](https://github.com/xtekky/gpt4free)
 
 ## Disclaimer
 
-This project is for educational purposes only. The author will not be responsible for any misuse of the information provided. All the information on this website is published in good faith and for general information purpose only. The author does not make any warranties about the completeness, reliability, and accuracy of this information. Any action you take upon the information you find on this website (FujiwaraChoki/MoneyPrinterV2), is strictly at your own risk. The author will not be liable for any losses and/or damages in connection with the use of our website.
+This project is for educational purposes only. The author will not be responsible for any misuse of the information provided. All the information on this website is published in good faith and for general information purposes only. The author does not make any warranties about the completeness, reliability, and accuracy of this information. Any action you take upon the information you find on this website (FujiwaraChoki/MoneyPrinterV2) is strictly at your own risk. The author will not be liable for any losses and/or damages in connection with the use of our website.

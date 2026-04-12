@@ -7,31 +7,13 @@ All your configurations will be in a file in the root directory, called `config.
 - `verbose`: `boolean` - If `true`, the application will print out more information.
 - `firefox_profile`: `string` - The path to your Firefox profile. This is used to use your Social Media Accounts without having to log in every time you run the application.
 - `headless`: `boolean` - If `true`, the application will run in headless mode. This means that the browser will not be visible.
-- `llm`: This will decide the Large Language Model MPV2 uses to generate tweets, scripts, image prompts and more. If left empty, the default model (`gpt35_turbo`) will be used. Here are your choices:
-    * `gpt4`
-    * `gpt35_turbo`
-    * `llama2_7b`
-    * `llama2_13b`
-    * `llama2_70b`
-    * `mixtral_8x7b`
-- `image_prompt_llm`: `string` - The Large Language Model that will be used to generate image prompts. If left empty, the default model (`gpt35_turbo`) will be used. Here are your choices:
-    * `gpt4`
-    * `gpt35_turbo`
-    * `llama2_7b`
-    * `llama2_13b`
-    * `llama2_70b`
-    * `mixtral_8x7b`
+- `ollama_base_url`: `string` - Base URL of your local Ollama server (default: `http://127.0.0.1:11434`).
+- `ollama_model`: `string` - Ollama model to use for text generation (e.g. `llama3.2:3b`). If empty, the app queries Ollama at startup and lets you pick from the available models interactively.
 - `twitter_language`: `string` - The language that will be used to generate & post tweets.
-- `image_model`: `string` - What AI Model you want to use to generate images, here are your choices:
-    * `v1`
-    * `v2`
-    * `v3` (DALL-E)
-    * `lexica`
-    * `prodia`
-    * `simurg`
-    * `animefy`
-    * `raava`
-    * `shonin`
+- `nanobanana2_api_base_url`: `string` - Nano Banana 2 API base URL (default: `https://generativelanguage.googleapis.com/v1beta`).
+- `nanobanana2_api_key`: `string` - API key for Nano Banana 2 (Gemini image API). If empty, MPV2 falls back to environment variable `GEMINI_API_KEY`.
+- `nanobanana2_model`: `string` - Nano Banana 2 model name (default: `gemini-3.1-flash-image-preview`).
+- `nanobanana2_aspect_ratio`: `string` - Aspect ratio for generated images (default: `9:16`).
 - `threads`: `number` - The amount of threads that will be used to execute operations, e.g. writing to a file using MoviePy.
 - `is_for_kids`: `boolean` - If `true`, the application will upload the video to YouTube Shorts as a video for kids.
 - `google_maps_scraper`: `string` - The URL to the Google Maps scraper. This will be used to scrape Google Maps for local businesses. It is recommended to use the default value.
@@ -45,9 +27,23 @@ All your configurations will be in a file in the root directory, called `config.
 - `scraper_timeout`: `number` - The timeout for the Google Maps scraper.
 - `outreach_message_subject`: `string` - The subject of your outreach message. `{{COMPANY_NAME}}` will be replaced with the company name.
 - `outreach_message_body_file`: `string` - The file that contains the body of your outreach message, should be HTML. `{{COMPANY_NAME}}` will be replaced with the company name.
+- `stt_provider`: `string` - Provider for subtitle transcription. Default is `local_whisper`. Options:
+    * `local_whisper`
+    * `third_party_assemblyai`
+- `whisper_model`: `string` - Whisper model for local transcription (for example `base`, `small`, `medium`, `large-v3`).
+- `whisper_device`: `string` - Device for local Whisper (`auto`, `cpu`, `cuda`).
+- `whisper_compute_type`: `string` - Compute type for local Whisper (`int8`, `float16`, etc.).
 - `assembly_ai_api_key`: `string` - Your Assembly AI API key. Get yours from [here](https://www.assemblyai.com/app/).
+- `tts_voice`: `string` - Voice for KittenTTS text-to-speech. Default is `Jasper`. Options: `Bella`, `Jasper`, `Luna`, `Bruno`, `Rosie`, `Hugo`, `Kiki`, `Leo`.
 - `font`: `string` - The font that will be used to generate images. This should be a `.ttf` file in the `fonts/` directory.
 - `imagemagick_path`: `string` - The path to the ImageMagick binary. This is used by MoviePy to manipulate images. Install ImageMagick from [here](https://imagemagick.org/script/download.php) and set the path to the `magick.exe` on Windows, or on Linux/MacOS the path to `convert` (usually /usr/bin/convert).
+- `script_sentence_length`: `number` - The number of sentences in the generated video script (default: `4`).
+- `post_bridge`: `object`:
+    - `enabled`: `boolean` - Enables Post Bridge cross-posting after successful YouTube uploads.
+    - `api_key`: `string` - Your Post Bridge API key. If empty, MPV2 falls back to `POST_BRIDGE_API_KEY`.
+    - `platforms`: `string[]` - Platforms to target. Supported values in v1 are `tiktok` and `instagram`.
+    - `account_ids`: `number[]` - Optional fixed Post Bridge account IDs to avoid account-selection prompts.
+    - `auto_crosspost`: `boolean` - If `true`, cross-post automatically after a successful YouTube upload. If `false`, interactive runs ask and cron runs skip.
 
 ## Example
 
@@ -56,10 +52,13 @@ All your configurations will be in a file in the root directory, called `config.
   "verbose": true,
   "firefox_profile": "",
   "headless": false,
+  "ollama_base_url": "http://127.0.0.1:11434",
+  "ollama_model": "",
   "twitter_language": "English",
-  "llm": "gpt4",
-  "image_prompt_llm": "gpt35_turbo",
-  "image_model": "prodia",
+  "nanobanana2_api_base_url": "https://generativelanguage.googleapis.com/v1beta",
+  "nanobanana2_api_key": "",
+  "nanobanana2_model": "gemini-3.1-flash-image-preview",
+  "nanobanana2_aspect_ratio": "9:16",
   "threads": 2,
   "zip_url": "",
   "is_for_kids": false,
@@ -74,8 +73,35 @@ All your configurations will be in a file in the root directory, called `config.
   "scraper_timeout": 300,
   "outreach_message_subject": "I have a question...",
   "outreach_message_body_file": "outreach_message.html",
+  "stt_provider": "local_whisper",
+  "whisper_model": "base",
+  "whisper_device": "auto",
+  "whisper_compute_type": "int8",
   "assembly_ai_api_key": "",
+  "tts_voice": "Jasper",
   "font": "bold_font.ttf",
-  "imagemagick_path": "C:\\Program Files\\ImageMagick-7.1.0-Q16\\magick.exe"
+  "imagemagick_path": "Path to magick.exe or on linux/macOS just /usr/bin/convert",
+  "script_sentence_length": 4,
+  "post_bridge": {
+    "enabled": false,
+    "api_key": "",
+    "platforms": ["tiktok", "instagram"],
+    "account_ids": [],
+    "auto_crosspost": false
+  }
 }
 ```
+
+## Environment Variable Fallbacks
+
+- `GEMINI_API_KEY`: used when `nanobanana2_api_key` is empty.
+- `POST_BRIDGE_API_KEY`: used when `post_bridge.api_key` is empty.
+
+Example:
+
+```bash
+export GEMINI_API_KEY="your_api_key_here"
+export POST_BRIDGE_API_KEY="your_post_bridge_api_key_here"
+```
+
+See [PostBridge.md](./PostBridge.md) for the full Post Bridge setup and behavior details.
