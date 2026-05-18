@@ -1,6 +1,6 @@
 # Post Bridge Integration
 
-MoneyPrinterV2 can optionally hand off a successfully uploaded YouTube Short to [Post Bridge](https://api.post-bridge.com/reference), which then publishes the same asset to connected TikTok and Instagram accounts.
+MoneyPrinterV2 can optionally hand off a successfully uploaded YouTube Short to [Post Bridge](https://post-bridge.com?atp=MoneyPrinter), which then publishes the same asset to connected TikTok and Instagram accounts.
 
 ## What Post Bridge Does
 

@@ -2,7 +2,7 @@
 
 Sponsored by Post Bridge
 
-<a href="https://www.post-bridge.com/?ref=moneyprinter">
+<a href="https://post-bridge.com?atp=MoneyPrinter">
   <img src="docs/repo/PostBridgeBanner.png" alt="Post Bridge integration banner" width="720" />
 </a>
 
